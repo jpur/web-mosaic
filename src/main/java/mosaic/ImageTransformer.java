@@ -1,5 +1,7 @@
 package mosaic;
 
+import java.io.File;
+
 public interface ImageTransformer {
-    byte[] transform(byte[] image);
+    void transform(File file, byte[] image);
 }

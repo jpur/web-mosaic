@@ -27,5 +27,6 @@ repositories {
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.0-M2'
 }
