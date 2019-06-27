@@ -37,6 +37,8 @@ public class FileSystemImageStore implements ImageStore {
 
     private File writeToFile(String fileName, BufferedImage img) throws IOException {
         File file = ResourceUtils.getFile(String.format("src/main/user_images/%s", fileName));
+
+        // TODO: This saves the wrong colour information for a small amount of JPG images with a different format. Need workaround.
         ImageIO.write(img, "jpg", file);
         return file;
     }

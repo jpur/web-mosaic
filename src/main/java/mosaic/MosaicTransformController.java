@@ -35,7 +35,7 @@ public class MosaicTransformController {
         ImageTransformer transformer = new MosaicTransformer(MosaicTransformer.Shape.Hex, 10);
         BufferedImage imgIn = ImageIO.read(image.getInputStream());
         BufferedImage imgOut = transformer.transform(imgIn);
-
+        
         String key = imageStore.add(imgOut);
 
         return String.format("redirect:/v/%s", key);
