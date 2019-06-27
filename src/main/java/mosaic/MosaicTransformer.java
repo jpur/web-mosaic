@@ -1,11 +1,7 @@
 package mosaic;
 
-import org.springframework.util.ResourceUtils;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class MosaicTransformer implements ImageTransformer {
     public enum Shape {
@@ -22,11 +18,7 @@ public class MosaicTransformer implements ImageTransformer {
     }
 
     @Override
-    public byte[] transform(byte[] image) {
-        byte[] out = new byte[image.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = 127;
-        }
-        return out;
+    public BufferedImage transform(BufferedImage image) {
+        return image;
     }
 }

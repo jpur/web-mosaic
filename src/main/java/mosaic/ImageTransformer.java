@@ -1,5 +1,7 @@
 package mosaic;
 
+import java.awt.image.BufferedImage;
+
 public interface ImageTransformer {
-    byte[] transform(byte[] image);
+    BufferedImage transform(BufferedImage image);
 }

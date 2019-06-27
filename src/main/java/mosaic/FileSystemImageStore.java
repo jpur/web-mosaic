@@ -1,8 +1,11 @@
 package mosaic;
 
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,10 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FileSystemImageStore implements ImageStore {
     static AtomicInteger nextAvailableId = new AtomicInteger(0);
 
-    private ConcurrentHashMap<String, File> images = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, File> images = new ConcurrentHashMap<>();
 
     @Override
-    public String add(byte[] img) throws IOException {
+    public String add(BufferedImage img) throws IOException {
         String id = getNextAvailableId();
         File file = writeToFile(id, img);
         images.put(id, file);
@@ -32,11 +35,9 @@ public class FileSystemImageStore implements ImageStore {
         return Integer.toString(nextAvailableId.getAndIncrement());
     }
 
-    private File writeToFile(String fileName, byte[] img) throws IOException {
-        File file = ResourceUtils.getFile(String.format("src/main/user_images/%s.jpg", fileName));
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write(img);
-        fos.close();
+    private File writeToFile(String fileName, BufferedImage img) throws IOException {
+        File file = ResourceUtils.getFile(String.format("src/main/user_images/%s", fileName));
+        ImageIO.write(img, "jpg", file);
         return file;
     }
 }
