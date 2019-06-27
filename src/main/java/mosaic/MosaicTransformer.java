@@ -22,17 +22,11 @@ public class MosaicTransformer implements ImageTransformer {
     }
 
     @Override
-    public void transform(File file, byte[] image) {
-        File f = null;
-        try {
-            f = ResourceUtils.getFile("src/main/user_images/0.jpg");
-            System.out.println(f.getAbsolutePath());
-            f.createNewFile();
-            FileOutputStream fos = new FileOutputStream(f);
-            fos.write(image);
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public byte[] transform(byte[] image) {
+        byte[] out = new byte[image.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = 127;
         }
+        return out;
     }
 }
