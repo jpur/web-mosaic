@@ -1,4 +1,4 @@
-package mosaic;
+package mosaic.transformer;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,17 +21,6 @@ public class MosaicTransformer implements ImageTransformer {
 
     private List<int[]>[][][] images;
 
-    public static BufferedImage resize(BufferedImage img, int newW, int newH) {
-        Image tmp = img.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
-        BufferedImage dimg = new BufferedImage(newW, newH, img.getType());
-
-        Graphics2D g2d = dimg.createGraphics();
-        g2d.drawImage(tmp, 0, 0, null);
-        g2d.dispose();
-
-        return dimg;
-    }
-
     public MosaicTransformer(Shape shape, int size) {
         this.shape = shape;
         this.size = size;
@@ -52,7 +41,7 @@ public class MosaicTransformer implements ImageTransformer {
             if (file.isFile()) {
                 try {
                     BufferedImage img = ImageIO.read(file);
-                    img = resize(img, 10, 10);
+                    img = resize(img, size, size);
                     int[] rgb = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
                     Color avgCol = getAverageColour(rgb);
                     images[avgCol.getRed()][avgCol.getGreen()][avgCol.getBlue()].add(rgb);
@@ -81,6 +70,35 @@ public class MosaicTransformer implements ImageTransformer {
 
     private void draw(BufferedImage target, int x, int y, int[] tile) {
         target.setRGB(x, y, size, size, tile, 0, size);
+    }
+
+    private int[] recolor(int[] arr) {
+        Color avgCol = getAverageColour(arr);
+
+        Color closest = kNN(images, avgCol, 1).get(0);
+        return images[closest.getRed()][closest.getGreen()][closest.getBlue()].get(0);
+    }
+
+    private List<Color> kNN(List<int[]>[][][] images, Color origin, int k) {
+        List<Color> out = new ArrayList<>();
+
+        Set<Color> colors = new HashSet<>();
+        colors.add(origin);
+        while (k > 0 && colors.size() > 0) {
+            for (Color color : colors) {
+                List<int[]> replacements = images[color.getRed()][color.getGreen()][color.getBlue()];
+                if (replacements.size() > 0) {
+                    out.add(color);
+                    if (--k == 0) return out;
+                }
+            }
+
+            Set<Color> newColors = new HashSet<>();
+            getNeighbors(origin, colors, newColors);
+            colors = newColors;
+        }
+
+        return out;
     }
 
     private Color getAverageColour(int[] colours) {
@@ -120,29 +138,14 @@ public class MosaicTransformer implements ImageTransformer {
         return Math.abs(a.getRed() - b.getRed()) + Math.abs(a.getGreen() - b.getGreen()) + Math.abs(a.getBlue() - b.getBlue());
     }
 
-    private int[] recolor(int[] arr) {
-        Color avgCol = getAverageColour(arr);
+    private static BufferedImage resize(BufferedImage img, int newW, int newH) {
+        Image tmp = img.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
+        BufferedImage dimg = new BufferedImage(newW, newH, img.getType());
 
-        Set<Color> colors = new HashSet<>();
-        colors.add(avgCol);
-        while (colors.size() > 0) {
-            for (Color color : colors) {
-                List<int[]> replacements = images[color.getRed()][color.getGreen()][color.getBlue()];
-                if (replacements.size() > 0) {
-                    return replacements.get(0);
-                }
-            }
+        Graphics2D g2d = dimg.createGraphics();
+        g2d.drawImage(tmp, 0, 0, null);
+        g2d.dispose();
 
-            Set<Color> newColors = new HashSet<>();
-            getNeighbors(avgCol, colors, newColors);
-            colors = newColors;
-        }
-
-
-        int[] out = new int[arr.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = avgCol.getRGB();
-        }
-        return out;
+        return dimg;
     }
 }

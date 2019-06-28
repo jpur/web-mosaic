@@ -1,4 +1,4 @@
-package mosaic;
+package mosaic.transformer;
 
 import java.awt.image.BufferedImage;
 

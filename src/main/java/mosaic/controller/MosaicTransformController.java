@@ -1,5 +1,8 @@
-package mosaic;
+package mosaic.controller;
 
+import mosaic.data.ImageStore;
+import mosaic.transformer.ImageTransformer;
+import mosaic.transformer.MosaicTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;

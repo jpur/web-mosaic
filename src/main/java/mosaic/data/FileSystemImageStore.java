@@ -1,14 +1,10 @@
-package mosaic;
-
-import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
+package mosaic.data;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class FileSystemImageStore implements ImageStore {
     private final ConcurrentHashMap<String, File> images = new ConcurrentHashMap<>();
