@@ -1,5 +1,6 @@
 package mosaic;
 
+import mosaic.util.ColorOctree;
 import mosaic.util.ColorUtils;
 
 import javax.imageio.ImageIO;
@@ -16,6 +17,8 @@ public final class MosaicData {
     private final int size;
     private List<int[]>[][][] images;
 
+    private ColorOctree octree;
+
     public MosaicData(String rootDir, int size) {
         this.size = size;
 
@@ -28,6 +31,7 @@ public final class MosaicData {
             }
         }
 
+        List<Color> points = new ArrayList<>();
 
         File[] files = new File(rootDir).listFiles();
 
@@ -38,12 +42,16 @@ public final class MosaicData {
                     img = resize(img, size, size);
                     int[] rgb = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
                     Color avgCol = ColorUtils.getAverageColor(rgb);
+                    points.add(avgCol);
+
                     images[avgCol.getRed()][avgCol.getGreen()][avgCol.getBlue()].add(rgb);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
+
+        octree = new ColorOctree(points);
     }
 
     public List<Color> getNearest(Color color, int k) {
