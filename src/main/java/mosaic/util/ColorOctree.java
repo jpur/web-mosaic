@@ -4,24 +4,23 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.PriorityQueue;
 
-public class ColorOctree extends Octree<Color, List<int[]>> {
-    private static final class ColorOctreeNode {
+public class ColorOctree<T> extends Octree<Color, List<T>> {
+    private static final class ColorOctreeNode<T> {
         public final boolean isLeaf;
         public final Bounds bounds;
-        public final List<ColorOctreeNode> children;
-        public final ColorCollection value;
+        public final List<ColorOctreeNode<T>> children;
+        public final ColorCollection<T> value;
 
-        public ColorOctreeNode(Bounds bounds, ColorCollection value) {
+        public ColorOctreeNode(Bounds bounds, ColorCollection<T> value) {
             this.isLeaf = true;
             this.bounds = bounds;
             this.value = value;
             children = null;
         }
 
-        public ColorOctreeNode(Bounds bounds, List<ColorOctreeNode> children) {
+        public ColorOctreeNode(Bounds bounds, List<ColorOctreeNode<T>> children) {
             this.isLeaf = false;
             this.bounds = bounds;
             this.children = children;
@@ -30,21 +29,21 @@ public class ColorOctree extends Octree<Color, List<int[]>> {
     }
 
     private final int maxDepth = 10;
-    private final ColorOctreeNode root;
+    private final ColorOctreeNode<T> root;
 
-    public ColorOctree(List<ColorCollection> points) {
+    public ColorOctree(List<ColorCollection<T>> points) {
         super(points);
         root = build(points);
     }
 
     @Override
-    public List<ColorCollection> nearestNeighbor(Color color, int k) {
-        List<ColorCollection> neighbors = new ArrayList<>();
+    public List<ColorCollection<T>> nearestNeighbor(Color color, int k) {
+        List<ColorCollection<T>> neighbors = new ArrayList<>();
 
-        PriorityQueue<ColorOctreeNode> pq = new PriorityQueue<>(Comparator.comparingInt(a -> distance(color, a)));
+        PriorityQueue<ColorOctreeNode<T>> pq = new PriorityQueue<>(Comparator.comparingInt(a -> distance(color, a)));
         pq.add(root);
         while (!pq.isEmpty() && neighbors.size() < k) {
-            ColorOctreeNode node = pq.poll();
+            ColorOctreeNode<T> node = pq.poll();
             if (node.isLeaf) {
                 neighbors.add(node.value);
             } else {
@@ -55,18 +54,31 @@ public class ColorOctree extends Octree<Color, List<int[]>> {
         return neighbors;
     }
 
-    private int distance(Color source, ColorOctreeNode node) {
+    /**
+     * Computes the distance between a color and node
+     * @param source A color
+     * @param node An octree node
+     * @return The distance between the color and octree
+     */
+    private int distance(Color source, ColorOctreeNode<T> node) {
+        // Return color-distance if node is a leaf
         if (node.isLeaf) {
             return ColorUtils.getDistance(source, node.value.getKey());
         }
 
+        // Return bounds-distance if node is not a leaf
         return node.bounds.distance(source.getRed(), source.getGreen(), source.getBlue());
     }
 
-    private ColorOctreeNode build(List<ColorCollection> points) {
+    /**
+     * Builds an octree with the given points
+     * @param points The points the octree will contain
+     * @return The root node of the octree
+     */
+    private ColorOctreeNode<T> build(List<ColorCollection<T>> points) {
         // Find bounds encompassing all points
         Bounds bounds = new Bounds();
-        for (SimpleEntry<Color, List<int[]>> p : points) {
+        for (ColorCollection<T> p : points) {
             Color color = p.getKey();
             bounds.encapsulate(color.getRed(), color.getGreen(), color.getBlue());
         }
@@ -74,26 +86,33 @@ public class ColorOctree extends Octree<Color, List<int[]>> {
         return build(points, bounds, 0);
     }
 
-    private ColorOctreeNode build(List<ColorCollection> points, Bounds bounds, int depth) {
+    /**
+     * Recursive method for building an octree with the given points
+     * @param points The points the octree will contain
+     * @param bounds The bounds of the octree that encompass the points
+     * @param depth The current depth of the octree
+     * @return The root node of the subtree
+     */
+    private ColorOctreeNode<T> build(List<ColorCollection<T>> points, Bounds bounds, int depth) {
         // Return leaf node is number of points less than threshold
         if (points.size() < 10 || depth > maxDepth) {
-            List<ColorOctreeNode> children = new ArrayList<>();
-            for (ColorCollection p : points) {
-                children.add(new ColorOctreeNode(bounds, p));
+            List<ColorOctreeNode<T>> children = new ArrayList<>();
+            for (ColorCollection<T> p : points) {
+                children.add(new ColorOctreeNode<>(bounds, p));
             }
 
-            return new ColorOctreeNode(bounds, children);
+            return new ColorOctreeNode<>(bounds, children);
         }
 
         // Subdivide bounds
         Bounds[] octants = bounds.subdivide();
-        List<List<ColorCollection>> childrenPoints = new ArrayList<>();
+        List<List<ColorCollection<T>>> childrenPoints = new ArrayList<>();
         for (int i = 0; i < octants.length; i++) {
             childrenPoints.add(new ArrayList<>());
         }
 
         // Add points to subdivisions
-        for (ColorCollection point : points) {
+        for (ColorCollection<T> point : points) {
             Color color = point.getKey();
             for (int i = 0; i < octants.length; i++) {
                 if (octants[i].contains(color.getRed(), color.getGreen(), color.getBlue())) {
@@ -103,11 +122,11 @@ public class ColorOctree extends Octree<Color, List<int[]>> {
             }
         }
 
-        List<ColorOctreeNode> children = new ArrayList<>();
+        List<ColorOctreeNode<T>> children = new ArrayList<>();
         for (int i = 0; i < octants.length; i++) {
             children.add(build(childrenPoints.get(i), octants[i], depth + 1));
         }
 
-        return new ColorOctreeNode(bounds, children);
+        return new ColorOctreeNode<>(bounds, children);
     }
 }

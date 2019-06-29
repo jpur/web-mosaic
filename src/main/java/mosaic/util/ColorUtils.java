@@ -18,6 +18,6 @@ public final class ColorUtils {
     }
 
     public static int getDistance(Color a, Color b) {
-        return Math.abs(a.getRed() - b.getRed()) + Math.abs(a.getGreen() - b.getGreen()) + Math.abs(a.getBlue() - b.getBlue());
+        return HelperUtils.distance(a.getRed(), a.getGreen(), a.getBlue(), b.getRed(), b.getGreen(), b.getBlue());
     }
 }
