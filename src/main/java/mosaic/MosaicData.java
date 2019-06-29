@@ -1,5 +1,6 @@
 package mosaic;
 
+import mosaic.util.ColorCollection;
 import mosaic.util.ColorOctree;
 import mosaic.util.ColorUtils;
 
@@ -9,9 +10,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 
 public final class MosaicData {
     private final int size;
@@ -31,7 +32,7 @@ public final class MosaicData {
             }
         }
 
-        List<Color> points = new ArrayList<>();
+        List<ColorCollection> points = new ArrayList<>();
 
         File[] files = new File(rootDir).listFiles();
 
@@ -42,9 +43,13 @@ public final class MosaicData {
                     img = resize(img, size, size);
                     int[] rgb = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
                     Color avgCol = ColorUtils.getAverageColor(rgb);
-                    points.add(avgCol);
 
-                    images[avgCol.getRed()][avgCol.getGreen()][avgCol.getBlue()].add(rgb);
+                    List<int[]> collection = images[avgCol.getRed()][avgCol.getGreen()][avgCol.getBlue()];
+                    collection.add(rgb);
+
+                    if (collection.size() == 1) {
+                        points.add(new ColorCollection(avgCol, collection));
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -55,7 +60,15 @@ public final class MosaicData {
     }
 
     public List<Color> getNearest(Color color, int k) {
-        return kNN(images, color, k);
+        List<Color> nearest = new ArrayList<>();
+        List<ColorCollection> collections = octree.nearestNeighbor(color, k);
+
+        nearest.add(collections.get(0).getKey());
+
+        return nearest;
+
+
+        //return kNN(images, color, k);
     }
 
     public List<int[]> getImages(Color color) {

@@ -20,6 +20,13 @@ public final class Bounds {
         return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
     }
 
+    public int distance(int x, int y, int z) {
+        int nx = Math.max(Math.min(x, maxX), minX);
+        int ny = Math.max(Math.min(y, maxY), minY);
+        int nz = Math.max(Math.min(z, maxZ), minZ);
+        return Math.abs(x - nx) + Math.abs(y - ny) + Math.abs(z - nz);
+    }
+
     public Bounds[] subdivide() {
         return new Bounds[] {
                 getSubdivision(0, 0, 0), getSubdivision(1, 0, 0), getSubdivision(0, 0, 1), getSubdivision(1, 0, 1),
