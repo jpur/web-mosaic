@@ -34,6 +34,7 @@ public final class MosaicData {
         List<SimpleEntry<Vector3i, List<int[]>>> points = new ArrayList<>();
         File[] files = new File(rootDir).listFiles();
 
+        // TODO: Clean this up!
         if (files != null) {
             for (File file : files) {
                 if (file.isFile()) {

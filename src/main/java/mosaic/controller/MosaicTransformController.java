@@ -2,10 +2,10 @@ package mosaic.controller;
 
 import mosaic.MosaicData;
 import mosaic.data.ImageStore;
-import mosaic.transformer.ImageTransformer;
 import mosaic.transformer.MosaicTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,14 +24,15 @@ public class MosaicTransformController {
     private final MosaicData mosaicData;
     private final MosaicTransformer transformer;
 
+    private final String imageOutputFormat = "png";
     private final int tileSize = 10;
 
     @Autowired
-    public MosaicTransformController(@Qualifier(value = "userStore") ImageStore imageStore) {
+    public MosaicTransformController(@Qualifier(value = "userStore") ImageStore imageStore, @Value("${mosaic.sub_img_path}") String subImgPath) {
         this.imageStore = imageStore;
 
-        mosaicData = new MosaicData("src/main/resources/test", tileSize);
-        transformer = new MosaicTransformer(mosaicData, MosaicTransformer.Shape.Square, 10);
+        mosaicData = new MosaicData(subImgPath, tileSize);
+        transformer = new MosaicTransformer(mosaicData, MosaicTransformer.Shape.Square, tileSize);
     }
 
     @GetMapping("/transform")
@@ -41,13 +42,12 @@ public class MosaicTransformController {
 
     @PostMapping("/transform")
     public String transform(@RequestParam("image") MultipartFile image) throws IOException {
-        final String imageFormat = "jpg";
 
         BufferedImage imgIn = ImageIO.read(image.getInputStream());
         BufferedImage imgOut = transformer.transform(imgIn);
 
-        String key = String.format("%s.%s", getNextAvailableImageId(), imageFormat);
-        imageStore.add(key, imageFormat, imgOut);
+        String key = String.format("%s.%s", getNextAvailableImageId(), imageOutputFormat);
+        imageStore.add(key, imageOutputFormat, imgOut);
 
         return String.format("redirect:/v/%s", key);
     }
