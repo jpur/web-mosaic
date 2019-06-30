@@ -6,46 +6,51 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.AbstractMap.SimpleEntry;
 
+/**
+ * An octree implementation that uses vector keys for positional information
+ * @param <K> The vector type for specifying points in space
+ * @param <T> The value type that each point holds
+ */
 public class VectorOctree<K extends Vector3i, T> implements Octree<K, T> {
-    private static final class OctreeNode<K, T> {
-        public final boolean isLeaf;
-        public final Bounds bounds;
-        public final List<OctreeNode<K, T>> children;
-        public final SimpleEntry<K, T> value;
-
-        public OctreeNode(Bounds bounds, SimpleEntry<K, T> value) {
-            this.isLeaf = true;
-            this.bounds = bounds;
-            this.value = value;
-            children = null;
-        }
-
-        public OctreeNode(Bounds bounds, List<OctreeNode<K, T>> children) {
-            this.isLeaf = false;
-            this.bounds = bounds;
-            this.children = children;
-            value = null;
-        }
-    }
-
+    /**
+     * The maximum depth the octree will be built to
+     */
     private final int maxDepth = 10;
+
+    /**
+     * The root node of the octree
+     */
     private final OctreeNode<K, T> root;
 
+    /**
+     * Constructs an octree from the given key-value pairs
+     * @param points The position-value points to be contained in the octree
+     */
     public VectorOctree(List<SimpleEntry<K, T>> points) {
         root = build(points);
     }
 
+    /**
+     * Retursn the nearest distance-wise k neighbors from the given key
+     * @param key The key to search for neighbors from
+     * @param k The maximum number of neighbors to be returned
+     * @return The key-value pairs of the nearest distance-wise neighbors from the given key
+     */
     @Override
     public List<SimpleEntry<K, T>> nearestNeighbor(K key, int k) {
         List<SimpleEntry<K, T>> neighbors = new ArrayList<>();
 
+        // Initialize priority queue based on distance from the given key
         PriorityQueue<OctreeNode<K, T>> pq = new PriorityQueue<>(Comparator.comparingInt(in -> distance(key, in)));
         pq.add(root);
         while (!pq.isEmpty() && neighbors.size() < k) {
+            // Get node closest to key
             OctreeNode<K, T> node = pq.poll();
             if (node.isLeaf) {
+                // Leaf and closest node so it must be a neighbor, add to neighbor list
                 neighbors.add(node.value);
             } else {
+                // Non-leaf and closest node so it may contain close nodes, add its children to priority queue
                 pq.addAll(node.children);
             }
         }
@@ -121,11 +126,13 @@ public class VectorOctree<K extends Vector3i, T> implements Octree<K, T> {
             }
         }
 
+        // Construct child subtrees
         List<OctreeNode<K, T>> children = new ArrayList<>();
         for (int i = 0; i < octants.length; i++) {
             children.add(build(childrenPoints.get(i), octants[i], depth + 1));
         }
 
+        // Return root of subtrees
         return new OctreeNode<>(bounds, children);
     }
 }

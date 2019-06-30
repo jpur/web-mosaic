@@ -56,10 +56,6 @@ public class MosaicTransformer implements ImageTransformer {
 
     private int[] recolor(int[] arr) {
         Color avgCol = ColorUtils.getAverageColor(arr);
-
-        //List<ColorCollection<int[]>> nearest = data.getNearest(avgCol, 3);
-        //ColorCollection<int[]> images = HelperUtils.getRandom(nearest);
-        //int[] img = HelperUtils.getRandom(images.getValue());
-        return HelperUtils.getRandom(data.getNearest(avgCol, 1));
+        return HelperUtils.getRandom(data.getNearest(avgCol, 2));
     }
 }
