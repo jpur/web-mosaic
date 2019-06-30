@@ -2,10 +2,11 @@ package mosaic.transformer;
 
 import mosaic.MosaicData;
 import mosaic.util.ColorUtils;
+import mosaic.util.HelperUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.List;
+import java.util.Random;
 
 public class MosaicTransformer implements ImageTransformer {
     public enum Shape {
@@ -16,7 +17,14 @@ public class MosaicTransformer implements ImageTransformer {
     private final MosaicData data;
     private final Shape shape;
     private final int size;
+    private final Random rand = new Random();
 
+    /**
+     * Constructs a mosaic transformer with the given parameters
+     * @param data The sub-image data the transformer will use to transform images
+     * @param shape The shape of the sub-images
+     * @param size The pixel size of the sub-images
+     */
     public MosaicTransformer(MosaicData data, Shape shape, int size) {
         this.data = data;
         this.shape = shape;
@@ -31,7 +39,10 @@ public class MosaicTransformer implements ImageTransformer {
 
         for (int y = 0; y < height / size; y++) {
             for (int x = 0; x < width / size; x++) {
+                // Get sub-image to replace subsection of image
                 int[] tile = recolor(image.getRGB(x * size, y * size, size, size, null, 0, size));
+
+                // Draw sub-image to corresponding subsection of mosaic
                 draw(out, x * size, y * size, tile);
             }
         }
@@ -46,8 +57,9 @@ public class MosaicTransformer implements ImageTransformer {
     private int[] recolor(int[] arr) {
         Color avgCol = ColorUtils.getAverageColor(arr);
 
-        List<Color> nearest = data.getNearest(avgCol, 1);
-        List<int[]> images = data.getImages(nearest.get(0));
-        return images.get(0);
+        //List<ColorCollection<int[]>> nearest = data.getNearest(avgCol, 3);
+        //ColorCollection<int[]> images = HelperUtils.getRandom(nearest);
+        //int[] img = HelperUtils.getRandom(images.getValue());
+        return HelperUtils.getRandom(data.getNearest(avgCol, 1));
     }
 }

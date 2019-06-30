@@ -22,6 +22,7 @@ public class MosaicTransformController {
     private final AtomicInteger nextAvailableId = new AtomicInteger(0);
     private final ImageStore imageStore;
     private final MosaicData mosaicData;
+    private final MosaicTransformer transformer;
 
     private final int tileSize = 10;
 
@@ -30,6 +31,7 @@ public class MosaicTransformController {
         this.imageStore = imageStore;
 
         mosaicData = new MosaicData("src/main/resources/test", tileSize);
+        transformer = new MosaicTransformer(mosaicData, MosaicTransformer.Shape.Square, 10);
     }
 
     @GetMapping("/transform")
@@ -41,7 +43,6 @@ public class MosaicTransformController {
     public String transform(@RequestParam("image") MultipartFile image) throws IOException {
         final String imageFormat = "jpg";
 
-        ImageTransformer transformer = new MosaicTransformer(mosaicData, MosaicTransformer.Shape.Square, tileSize);
         BufferedImage imgIn = ImageIO.read(image.getInputStream());
         BufferedImage imgOut = transformer.transform(imgIn);
 

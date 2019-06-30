@@ -1,24 +1,22 @@
 package mosaic;
 
-import mosaic.util.ColorCollection;
-import mosaic.util.ColorOctree;
-import mosaic.util.ColorUtils;
+import mosaic.util.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.AbstractMap.SimpleEntry;
 
 import static mosaic.util.ImageUtils.resize;
 
 public final class MosaicData {
     private final int size;
 
-    private ColorOctree<int[]> octree;
+    private VectorOctree<Vector3i, List<int[]>> octree;
 
     public MosaicData(String rootDir, int size) {
         this.size = size;
@@ -33,7 +31,7 @@ public final class MosaicData {
             }
         }
 
-        List<ColorCollection<int[]>> points = new ArrayList<>();
+        List<SimpleEntry<Vector3i, List<int[]>>> points = new ArrayList<>();
         File[] files = new File(rootDir).listFiles();
 
         if (files != null) {
@@ -49,7 +47,7 @@ public final class MosaicData {
                         collection.add(rgb);
 
                         if (collection.size() == 1) {
-                            points.add(new ColorCollection<>(avgCol, collection));
+                            points.add(new SimpleEntry<>(new Vector3i(avgCol.getRed(), avgCol.getGreen(), avgCol.getBlue()), collection));
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -58,15 +56,17 @@ public final class MosaicData {
             }
         }
 
-        octree = new ColorOctree<>(points);
+        octree = new VectorOctree<>(points);
     }
 
-    public List<Color> getNearest(Color color, int k) {
-        List<Color> nearest = new ArrayList<>();
-        List<ColorCollection<int[]>> collections = octree.nearestNeighbor(color, k);
+    public List<int[]> getNearest(Color color, int k) {
+        List<SimpleEntry<Vector3i, List<int[]>>> collections = octree.nearestNeighbor(new Vector3i(color.getRed(), color.getGreen(), color.getBlue()), k);
 
-        nearest.add(collections.get(0).getKey());
+        List<int[]> res = new ArrayList<>();
+        for (SimpleEntry<Vector3i, List<int[]>> c : collections) {
+            res.addAll(c.getValue());
+        }
 
-        return nearest;
+        return res;
     }
 }

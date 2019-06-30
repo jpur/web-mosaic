@@ -20,11 +20,20 @@ public final class Bounds {
      * Returns true if the bounds encapsulates the given point
      * @param x The x position of the point
      * @param y The y position of the point
-     * @param z The z position of the ponit
+     * @param z The z position of the point
      * @return True if the bounds encapsulates the given point
      */
     public boolean contains(int x, int y, int z) {
         return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
+    }
+
+    /**
+     * Returns true if the bounds encapsulates the given point
+     * @param vec The point to test against
+     * @return True if the bounds encapsulates the given point
+     */
+    public boolean contains(Vector3i vec) {
+        return contains(vec.getX(), vec.getY(), vec.getZ());
     }
 
     /**
@@ -39,6 +48,15 @@ public final class Bounds {
         int ny = Math.max(Math.min(y, maxY), minY);
         int nz = Math.max(Math.min(z, maxZ), minZ);
         return HelperUtils.distance(x, y, z, nx, ny, nz);
+    }
+
+    /**
+     * Returns the minimal distance between a given point and the bounds
+     * @param vec The point to test against
+     * @return The minimal distance between the point
+     */
+    public int distance(Vector3i vec) {
+        return distance(vec.getX(), vec.getY(), vec.getZ());
     }
 
     /**
@@ -65,6 +83,14 @@ public final class Bounds {
         maxX = Math.max(x, maxX);
         maxY = Math.max(y, maxY);
         maxZ = Math.max(z, maxZ);
+    }
+
+    /**
+     * Expands the bounds to include the given point
+     * @param vec The point to encapsulate
+     */
+    public void encapsulate(Vector3i vec) {
+        encapsulate(vec.getX(), vec.getY(), vec.getZ());
     }
 
     @Override
