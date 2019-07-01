@@ -3,9 +3,13 @@ package mosaic.controller;
 import mosaic.MosaicData;
 import mosaic.data.ImageStore;
 import mosaic.transformer.MosaicTransformer;
+import mosaic.transformer.ThreadedMosaicTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.support.ExecutorServiceAdapter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,15 +28,18 @@ public class MosaicTransformController {
     private final MosaicData mosaicData;
     private final MosaicTransformer transformer;
 
+    private final TaskExecutor executor;
+
     private final String imageOutputFormat = "png";
     private final int tileSize = 10;
 
     @Autowired
-    public MosaicTransformController(@Qualifier(value = "userStore") ImageStore imageStore, @Value("${mosaic.sub_img_path}") String subImgPath) {
+    public MosaicTransformController(TaskExecutor executor, @Qualifier(value = "userStore") ImageStore imageStore, @Value("${mosaic.sub_img_path}") String subImgPath) {
+        this.executor = executor;
         this.imageStore = imageStore;
 
         mosaicData = new MosaicData(subImgPath, tileSize);
-        transformer = new MosaicTransformer(mosaicData, MosaicTransformer.Shape.Square, tileSize);
+        transformer = new ThreadedMosaicTransformer(new ExecutorServiceAdapter(executor), mosaicData, MosaicTransformer.Shape.Square, tileSize);
     }
 
     @GetMapping("/transform")

@@ -14,9 +14,10 @@ public class MosaicTransformer implements ImageTransformer {
         Hex,
     }
 
-    private final MosaicData data;
-    private final Shape shape;
-    private final int size;
+    protected final MosaicData data;
+    protected final Shape shape;
+    protected final int size;
+
     private final Random rand = new Random();
 
     /**
@@ -43,18 +44,18 @@ public class MosaicTransformer implements ImageTransformer {
                 int[] tile = recolor(image.getRGB(x * size, y * size, size, size, null, 0, size));
 
                 // Draw sub-image to corresponding subsection of mosaic
-                draw(out, x * size, y * size, tile);
+                draw(out, x * size, y * size, tile, size, size);
             }
         }
 
         return out;
     }
 
-    private void draw(BufferedImage target, int x, int y, int[] tile) {
-        target.setRGB(x, y, size, size, tile, 0, size);
+    protected void draw(BufferedImage target, int x, int y, int[] tile, int xSize, int ySize) {
+        target.setRGB(x, y, xSize, ySize, tile, 0, xSize);
     }
 
-    private int[] recolor(int[] arr) {
+    protected int[] recolor(int[] arr) {
         Color avgCol = ColorUtils.getAverageColor(arr);
         return HelperUtils.getRandom(data.getNearest(avgCol, 2));
     }

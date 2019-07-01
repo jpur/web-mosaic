@@ -9,6 +9,10 @@ public class Vector3i {
         this.z = z;
     }
 
+    public static <T> int distance(Vector3i a, Vector3i b) {
+        return HelperUtils.distance(a.getX(), a.getY(), a.getZ(), b.getX(), b.getY(), b.getZ());
+    }
+
     public int getX() {
         return x;
     }

@@ -67,7 +67,7 @@ public class VectorOctree<K extends Vector3i, T> implements Octree<K, T> {
     private int distance(K source, OctreeNode<K, T> node) {
         // Return color-distance if node is a leaf
         if (node.isLeaf) {
-            return HelperUtils.distance(source, node.value.getKey());
+            return Vector3i.distance(source, node.value.getKey());
         }
 
         // Return bounds-distance if node is not a leaf
