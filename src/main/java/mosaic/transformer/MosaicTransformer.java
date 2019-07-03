@@ -18,7 +18,7 @@ public class MosaicTransformer implements ImageTransformer {
     protected final Shape shape;
     protected final int size;
 
-    private final Random rand = new Random();
+    private static final Random rand = new Random();
 
     /**
      * Constructs a mosaic transformer with the given parameters

@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
@@ -49,10 +50,11 @@ public class MosaicTransformController {
 
     @PostMapping("/transform")
     public String transform(@RequestParam("image") MultipartFile image) throws IOException {
+        InputStream in = image.getInputStream();
+        BufferedImage imgIn = ImageIO.read(in);
+        in.close();
 
-        BufferedImage imgIn = ImageIO.read(image.getInputStream());
         BufferedImage imgOut = transformer.transform(imgIn);
-
         String key = String.format("%s.%s", getNextAvailableImageId(), imageOutputFormat);
         imageStore.add(key, imageOutputFormat, imgOut);
 

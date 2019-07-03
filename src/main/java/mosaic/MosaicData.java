@@ -8,10 +8,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.AbstractMap.SimpleEntry;
-
-import static mosaic.util.ImageUtils.resize;
+import java.util.Map;
 
 public final class MosaicData {
     private final int size;
@@ -21,30 +21,24 @@ public final class MosaicData {
     public MosaicData(String rootDir, int size) {
         this.size = size;
 
-        @SuppressWarnings("unchecked")
-        List<int[]>[][][] images = (ArrayList<int[]>[][][])new ArrayList<?>[256][256][256];
-        for (int i = 0; i <= 255; i++) {
-            for (int j = 0; j <= 255; j++) {
-                for (int k = 0; k <= 255; k++) {
-                    images[i][j][k] = new ArrayList<>();
-                }
-            }
-        }
-
+        Map<Color, ArrayList<int[]>> images = new HashMap<>();
         List<SimpleEntry<Vector3i, List<int[]>>> points = new ArrayList<>();
         File[] files = new File(rootDir).listFiles();
 
-        // TODO: Clean this up!
         if (files != null) {
             for (File file : files) {
                 if (file.isFile()) {
                     try {
                         BufferedImage img = ImageIO.read(file);
-                        img = resize(img, size, size, Image.SCALE_SMOOTH);
+                        img = ImageUtils.resize(img, size, size, Image.SCALE_SMOOTH);
                         int[] rgb = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
                         Color avgCol = ColorUtils.getAverageColor(rgb);
 
-                        List<int[]> collection = images[avgCol.getRed()][avgCol.getGreen()][avgCol.getBlue()];
+                        if (!images.containsKey(avgCol)) {
+                            images.put(avgCol, new ArrayList<>());
+                        }
+
+                        List<int[]> collection = images.get(avgCol);
                         collection.add(rgb);
 
                         if (collection.size() == 1) {

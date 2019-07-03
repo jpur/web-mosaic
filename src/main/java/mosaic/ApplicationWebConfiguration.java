@@ -41,9 +41,10 @@ public class ApplicationWebConfiguration implements WebMvcConfigurer {
 
     @Bean
     public TaskExecutor taskExecutor() {
+        int cores = Runtime.getRuntime().availableProcessors();
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(8);
-        executor.setMaxPoolSize(8);
+        executor.setCorePoolSize(cores);
+        executor.setMaxPoolSize(cores);
         return executor;
     }
 }

@@ -39,7 +39,7 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
                 draw(target, x, y, tile, xSize, ySize);
             }
 
-            return null;
+            return target;
         }
     }
 
