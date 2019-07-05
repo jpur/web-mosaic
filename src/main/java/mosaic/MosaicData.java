@@ -1,6 +1,8 @@
 package mosaic;
 
 import mosaic.util.*;
+import mosaic.util.helper.ColorUtils;
+import mosaic.util.helper.ImageUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package mosaic.util;
+package mosaic.util.helper;
 
 import java.awt.*;
 

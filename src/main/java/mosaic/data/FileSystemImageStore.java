@@ -1,5 +1,8 @@
 package mosaic.data;
 
+import com.sun.javafx.beans.IDProperty;
+import mosaic.util.id.IdProvider;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -9,16 +12,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FileSystemImageStore implements ImageStore {
     private final ConcurrentHashMap<String, File> images = new ConcurrentHashMap<>();
     private final String rootDir;
+    private final IdProvider idProvider;
 
-    public FileSystemImageStore(String rootDir) {
+    public FileSystemImageStore(IdProvider provider, String rootDir) {
+        this.idProvider = provider;
         this.rootDir = rootDir;
     }
 
     @Override
-    public File add(String key, String format, BufferedImage img) throws IOException {
-        File file = writeToFile(key, format, img);
+    public String add(BufferedImage img, String format) throws IOException {
+        String key = idProvider.provide();
+        String fileName = String.format("%s.%s", key, format);
+        File file = writeToFile(fileName, format, img);
         images.put(key, file);
-        return file;
+        return key;
     }
 
     @Override

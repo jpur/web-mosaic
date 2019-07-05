@@ -1,5 +1,7 @@
 package mosaic.util;
 
+import mosaic.util.helper.HelperUtils;
+
 public final class Bounds {
     private int minX, minY, minZ, maxX, maxY, maxZ;
 

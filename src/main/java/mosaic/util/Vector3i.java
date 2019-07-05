@@ -1,5 +1,7 @@
 package mosaic.util;
 
+import mosaic.util.helper.HelperUtils;
+
 public class Vector3i {
     private int x, y, z;
 

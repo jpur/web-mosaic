@@ -1,8 +1,8 @@
 package mosaic.transformer;
 
 import mosaic.MosaicData;
-import mosaic.util.ColorUtils;
-import mosaic.util.HelperUtils;
+import mosaic.util.helper.ColorUtils;
+import mosaic.util.helper.HelperUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

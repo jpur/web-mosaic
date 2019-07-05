@@ -5,6 +5,6 @@ import java.io.File;
 import java.io.IOException;
 
 public interface ImageStore {
-    File add(String key, String format, BufferedImage img) throws IOException;
+    String add(BufferedImage img, String format) throws IOException;
     File get(String key) throws IOException;
 }

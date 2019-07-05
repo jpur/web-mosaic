@@ -1,6 +1,8 @@
 package mosaic;
 
 import mosaic.data.FileSystemImageStore;
+import mosaic.util.id.IdProvider;
+import mosaic.util.id.IncreasingIntegerIdProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,15 +30,20 @@ public class ApplicationWebConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
+    public IdProvider getImageStoreIdProvider() {
+        return new IncreasingIntegerIdProvider(0);
+    }
+
+    @Bean
     @Qualifier(value = "userStore")
-    public FileSystemImageStore getUserStore(@Value("${mosaic.user_img_path}") String path) {
-        return new FileSystemImageStore(path);
+    public FileSystemImageStore getUserStore(IdProvider idProvider, @Value("${mosaic.user_img_path}") String path) {
+        return new FileSystemImageStore(idProvider, path);
     }
 
     @Bean
     @Qualifier(value = "imageStore")
-    public FileSystemImageStore getImageStore(@Value("${mosaic.sub_img_path}") String path) {
-        return new FileSystemImageStore(path);
+    public FileSystemImageStore getImageStore(IdProvider idProvider, @Value("${mosaic.sub_img_path}") String path) {
+        return new FileSystemImageStore(idProvider, path);
     }
 
     @Bean

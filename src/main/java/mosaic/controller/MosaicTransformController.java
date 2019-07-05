@@ -4,12 +4,13 @@ import mosaic.MosaicData;
 import mosaic.data.ImageStore;
 import mosaic.transformer.MosaicTransformer;
 import mosaic.transformer.ThreadedMosaicTransformer;
+import mosaic.util.id.IdProvider;
+import mosaic.util.id.IncreasingIntegerIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.ExecutorServiceAdapter;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,11 +21,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
 public class MosaicTransformController {
-    private final AtomicInteger nextAvailableId = new AtomicInteger(0);
     private final ImageStore imageStore;
     private final MosaicData mosaicData;
     private final MosaicTransformer transformer;
@@ -35,7 +34,9 @@ public class MosaicTransformController {
     private final int tileSize = 10;
 
     @Autowired
-    public MosaicTransformController(TaskExecutor executor, @Qualifier(value = "userStore") ImageStore imageStore, @Value("${mosaic.sub_img_path}") String subImgPath) {
+    public MosaicTransformController(TaskExecutor executor,
+                                     @Qualifier(value = "userStore") ImageStore imageStore,
+                                     @Value("${mosaic.sub_img_path}") String subImgPath) {
         this.executor = executor;
         this.imageStore = imageStore;
 
@@ -50,18 +51,16 @@ public class MosaicTransformController {
 
     @PostMapping("/transform")
     public String transform(@RequestParam("image") MultipartFile image) throws IOException {
+        // Read in image
         InputStream in = image.getInputStream();
         BufferedImage imgIn = ImageIO.read(in);
         in.close();
 
+        // Generate and save mosaic
         BufferedImage imgOut = transformer.transform(imgIn);
-        String key = String.format("%s.%s", getNextAvailableImageId(), imageOutputFormat);
-        imageStore.add(key, imageOutputFormat, imgOut);
+        String key = imageStore.add(imgOut, imageOutputFormat);
 
+        // Redirect to mosaic location
         return String.format("redirect:/v/%s", key);
-    }
-
-    private String getNextAvailableImageId() {
-        return Integer.toString(nextAvailableId.getAndIncrement());
     }
 }
