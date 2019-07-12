@@ -1,4 +1,4 @@
-package mosaic.data;
+package mosaic.data.store;
 
 import mosaic.util.id.IdProvider;
 import software.amazon.awssdk.core.ResponseBytes;

@@ -2,6 +2,8 @@ package mosaic.util;
 
 import mosaic.util.helper.HelperUtils;
 
+import java.util.Vector;
+
 public class Vector3i {
     private int x, y, z;
 
@@ -25,5 +27,28 @@ public class Vector3i {
 
     public int getZ() {
         return z;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) return false;
+        if (!Vector3i.class.isAssignableFrom(other.getClass())) return false;
+
+        final Vector3i vec = (Vector3i)other;
+        return vec.getX() == x && vec.getY() == y && vec.getZ() == z;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%d,%d,%d)", x, y, z);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 23;
+        hash = hash * 31 + x;
+        hash = hash * 31 + y;
+        hash = hash * 31 + z;
+        return hash;
     }
 }

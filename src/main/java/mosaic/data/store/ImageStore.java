@@ -1,4 +1,4 @@
-package mosaic.data;
+package mosaic.data.store;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

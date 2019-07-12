@@ -1,8 +1,10 @@
 package mosaic.transformer;
 
-import mosaic.MosaicData;
+import mosaic.util.MosaicMatcher;
+import mosaic.data.store.StoreClient;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -32,11 +34,16 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
                 int xSize = Math.min(size, source.getWidth() - x);
                 int ySize = Math.min(size, source.getHeight() - y);
 
-                // Get sub-image to replace subsection of image
-                int[] tile = recolor(source.getRGB(x, y, xSize, ySize, null, 0, xSize));
+                try {
+                    // Get sub-image to replace subsection of image
+                    int[] tile = recolor(source.getRGB(x, y, xSize, ySize, null, 0, xSize));
 
-                // Draw sub-image to corresponding subsection of mosaic
-                draw(target, x, y, tile, xSize, ySize);
+                    // Draw sub-image to corresponding subsection of mosaic
+                    draw(target, x, y, tile, xSize, ySize);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
 
             return target;
@@ -52,8 +59,8 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
      * @param shape The shape of the sub-images
      * @param size The pixel size of the sub-images
      */
-    public ThreadedMosaicTransformer(ExecutorService executor, MosaicData data, Shape shape, int size) {
-        super(data, shape, size);
+    public ThreadedMosaicTransformer(ExecutorService executor, MosaicMatcher data, StoreClient<int[]> mosaicStore, Shape shape, int size) {
+        super(data, mosaicStore, shape, size);
         this.executor = executor;
     }
 

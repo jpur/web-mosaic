@@ -1,11 +1,14 @@
 package mosaic.controller;
 
-import mosaic.MosaicData;
-import mosaic.data.ImageStore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import mosaic.data.ColorDeserializer;
+import mosaic.data.store.ColorImageStoreClient;
+import mosaic.util.MosaicMatcher;
+import mosaic.data.MosaicImageInfo;
+import mosaic.data.store.ImageStore;
 import mosaic.transformer.MosaicTransformer;
 import mosaic.transformer.ThreadedMosaicTransformer;
-import mosaic.util.id.IdProvider;
-import mosaic.util.id.IncreasingIntegerIdProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,14 +21,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 @Controller
 public class MosaicTransformController {
-    private final ImageStore imageStore;
-    private final MosaicData mosaicData;
+    private final ImageStore userImageStore;
+    private final MosaicMatcher mosaicData;
     private final MosaicTransformer transformer;
 
     private final TaskExecutor executor;
@@ -35,13 +41,23 @@ public class MosaicTransformController {
 
     @Autowired
     public MosaicTransformController(TaskExecutor executor,
-                                     @Qualifier(value = "userStore") ImageStore imageStore,
-                                     @Value("${mosaic.sub_img_path}") String subImgPath) {
+                                     @Qualifier(value = "userStore") ImageStore userImageStore,
+                                     @Qualifier(value = "imageStore") ImageStore subImageStore,
+                                     @Value("${mosaic.sub_img_data_path}") String subImgDataPath) throws IOException {
         this.executor = executor;
-        this.imageStore = imageStore;
+        this.userImageStore = userImageStore;
 
-        mosaicData = new MosaicData(subImgPath, tileSize);
-        transformer = new ThreadedMosaicTransformer(new ExecutorServiceAdapter(executor), mosaicData, MosaicTransformer.Shape.Square, tileSize);
+        // Parse key/color pairs TODO: Shouldn't do this here, clean up later
+        File file = new File(subImgDataPath);
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Color.class, new ColorDeserializer());
+        mapper.registerModule(module);
+        MosaicImageInfo[] info = mapper.readValue(file, MosaicImageInfo[].class);
+
+        mosaicData = new MosaicMatcher(Arrays.asList(info));
+        transformer = new ThreadedMosaicTransformer(new ExecutorServiceAdapter(executor),
+                mosaicData, new ColorImageStoreClient(subImageStore), MosaicTransformer.Shape.Square, tileSize);
     }
 
     @GetMapping("/transform")
@@ -58,7 +74,7 @@ public class MosaicTransformController {
 
         // Generate and save mosaic
         BufferedImage imgOut = transformer.transform(imgIn);
-        String key = imageStore.add(imgOut, imageOutputFormat);
+        String key = userImageStore.add(imgOut, imageOutputFormat);
 
         // Redirect to mosaic location
         return String.format("redirect:/v/%s", key);

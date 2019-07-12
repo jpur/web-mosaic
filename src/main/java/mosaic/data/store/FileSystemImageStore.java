@@ -1,4 +1,4 @@
-package mosaic.data;
+package mosaic.data.store;
 
 import mosaic.util.id.IdProvider;
 
@@ -16,6 +16,14 @@ public class FileSystemImageStore implements ImageStore {
     public FileSystemImageStore(IdProvider provider, String rootDir) {
         this.idProvider = provider;
         this.rootDir = rootDir;
+
+        // Track existing files TODO: Shouldn't be relying on this
+        File[] files = new File(rootDir).listFiles();
+        if (files != null) {
+            for (File file : files) {
+                images.put(file.getName(), file);
+            }
+        }
     }
 
     @Override

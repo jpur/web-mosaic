@@ -1,11 +1,14 @@
 package mosaic.transformer;
 
-import mosaic.MosaicData;
+import mosaic.util.MosaicMatcher;
+import mosaic.data.MosaicImageInfo;
+import mosaic.data.store.StoreClient;
 import mosaic.util.helper.ColorUtils;
 import mosaic.util.helper.HelperUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Random;
 
 public class MosaicTransformer implements ImageTransformer {
@@ -14,11 +17,13 @@ public class MosaicTransformer implements ImageTransformer {
         Hex,
     }
 
-    protected final MosaicData data;
+    protected final MosaicMatcher data;
     protected final Shape shape;
     protected final int size;
 
     private static final Random rand = new Random();
+
+    private final StoreClient<int[]> mosaicStore;
 
     /**
      * Constructs a mosaic transformer with the given parameters
@@ -26,14 +31,16 @@ public class MosaicTransformer implements ImageTransformer {
      * @param shape The shape of the sub-images
      * @param size The pixel size of the sub-images
      */
-    public MosaicTransformer(MosaicData data, Shape shape, int size) {
+    public MosaicTransformer(MosaicMatcher data, StoreClient<int[]> mosaicStore, Shape shape, int size) {
         this.data = data;
+        this.mosaicStore = mosaicStore;
         this.shape = shape;
         this.size = size;
     }
 
     @Override
-    public BufferedImage transform(BufferedImage image) {
+    public BufferedImage transform(BufferedImage image) throws IOException {
+        System.out.println("transform");
         int width = image.getWidth();
         int height = image.getHeight();
         BufferedImage out = new BufferedImage(width, height, image.getType());
@@ -55,8 +62,10 @@ public class MosaicTransformer implements ImageTransformer {
         target.setRGB(x, y, xSize, ySize, tile, 0, xSize);
     }
 
-    protected int[] recolor(int[] arr) {
+    protected int[] recolor(int[] arr) throws IOException {
         Color avgCol = ColorUtils.getAverageColor(arr);
-        return HelperUtils.getRandom(data.getNearest(avgCol, 2));
+        MosaicImageInfo imageInfo = HelperUtils.getRandom(data.getNearest(avgCol, 2));
+
+        return mosaicStore.getImage(imageInfo.getName());
     }
 }
