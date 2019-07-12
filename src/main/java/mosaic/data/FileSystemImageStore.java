@@ -1,6 +1,5 @@
 package mosaic.data;
 
-import com.sun.javafx.beans.IDProperty;
 import mosaic.util.id.IdProvider;
 
 import javax.imageio.ImageIO;

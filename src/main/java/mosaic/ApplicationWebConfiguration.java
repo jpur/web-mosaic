@@ -1,6 +1,8 @@
 package mosaic;
 
 import mosaic.data.FileSystemImageStore;
+import mosaic.data.ImageStore;
+import mosaic.data.S3ImageStore;
 import mosaic.util.id.IdProvider;
 import mosaic.util.id.IncreasingIntegerIdProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,17 +14,25 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import software.amazon.awssdk.services.s3.S3Client;
+
 import java.io.IOException;
 
 @Configuration
 public class ApplicationWebConfiguration implements WebMvcConfigurer {
+    @Value("${mosaic.store_service_type}")
+    private String storeServiceType;
+
     @Value("${mosaic.user_img_path}")
-    private String user_img_path;
+    private String userImgPath;
+
+    @Value("${mosaic.s3_bucket_name}")
+    private String s3BucketName;
 
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         try {
-            String url = ResourceUtils.getURL(user_img_path).toString();
+            String url = ResourceUtils.getURL(userImgPath).toString();
             registry.addResourceHandler("/user_images/**").addResourceLocations(url);
         } catch (IOException e) {
             e.printStackTrace();
@@ -36,14 +46,34 @@ public class ApplicationWebConfiguration implements WebMvcConfigurer {
 
     @Bean
     @Qualifier(value = "userStore")
-    public FileSystemImageStore getUserStore(IdProvider idProvider, @Value("${mosaic.user_img_path}") String path) {
-        return new FileSystemImageStore(idProvider, path);
+    public ImageStore getUserStore(IdProvider idProvider, @Value("${mosaic.user_img_path}") String path) {
+        ImageStore store;
+        switch (storeServiceType.toLowerCase()) {
+            case "s3":
+                store = new S3ImageStore(idProvider, S3Client.builder().build(), s3BucketName, path);
+                break;
+            default:
+                store = new FileSystemImageStore(idProvider, path);
+                break;
+        }
+
+        return store;
     }
 
     @Bean
     @Qualifier(value = "imageStore")
-    public FileSystemImageStore getImageStore(IdProvider idProvider, @Value("${mosaic.sub_img_path}") String path) {
-        return new FileSystemImageStore(idProvider, path);
+    public ImageStore getImageStore(IdProvider idProvider, @Value("${mosaic.sub_img_path}") String path) {
+        ImageStore store;
+        switch (storeServiceType.toLowerCase()) {
+            case "s3":
+                store = new S3ImageStore(idProvider, S3Client.builder().build(), s3BucketName, path);
+                break;
+            default:
+                store = new FileSystemImageStore(idProvider, path);
+                break;
+        }
+
+        return store;
     }
 
     @Bean

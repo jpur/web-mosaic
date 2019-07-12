@@ -1,10 +1,8 @@
 package mosaic.util.id;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 public class AlphanumericIdProvider implements IdProvider {
     public AlphanumericIdProvider() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
