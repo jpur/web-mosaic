@@ -1,6 +1,10 @@
 buildscript {
+    repositories {
+        mavenCentral()
+    }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.4.RELEASE")
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.8.RELEASE"
     }
 }
 
@@ -28,5 +32,8 @@ repositories {
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation platform('software.amazon.awssdk:bom:2.5.29')
+    implementation 'software.amazon.awssdk:kinesis'
+    implementation 'software.amazon.awssdk:s3'
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.0-M2'
 }
