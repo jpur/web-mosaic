@@ -3,6 +3,7 @@ package mosaic;
 import mosaic.data.store.FileSystemImageStore;
 import mosaic.data.store.ImageStore;
 import mosaic.data.store.S3ImageStore;
+import mosaic.data.store.cache.InMemoryCache;
 import mosaic.util.id.IdProvider;
 import mosaic.util.id.IncreasingIntegerIdProvider;
 import org.springframework.beans.factory.annotation.Qualifier;

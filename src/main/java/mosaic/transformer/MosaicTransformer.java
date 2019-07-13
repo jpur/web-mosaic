@@ -40,7 +40,6 @@ public class MosaicTransformer implements ImageTransformer {
 
     @Override
     public BufferedImage transform(BufferedImage image) throws IOException {
-        System.out.println("transform");
         int width = image.getWidth();
         int height = image.getHeight();
         BufferedImage out = new BufferedImage(width, height, image.getType());
@@ -66,6 +65,6 @@ public class MosaicTransformer implements ImageTransformer {
         Color avgCol = ColorUtils.getAverageColor(arr);
         MosaicImageInfo imageInfo = HelperUtils.getRandom(data.getNearest(avgCol, 2));
 
-        return mosaicStore.getImage(imageInfo.getName());
+        return mosaicStore.get(imageInfo.getName());
     }
 }

@@ -5,11 +5,13 @@ import mosaic.util.id.IdProvider;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FileSystemImageStore implements ImageStore {
     private final ConcurrentHashMap<String, File> images = new ConcurrentHashMap<>();
+
     private final String rootDir;
     private final IdProvider idProvider;
 
@@ -37,6 +39,9 @@ public class FileSystemImageStore implements ImageStore {
 
     @Override
     public File get(String key) {
+        //File file = new File(key);
+        //if (!file.exists()) throw new FileNotFoundException("File " + key + " not found.");
+
         return images.get(key);
     }
 
