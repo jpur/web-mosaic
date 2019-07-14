@@ -21,7 +21,6 @@ public class ColorImageStoreClient implements StoreClient<int[]> {
     @Override
     public int[] get(String key) throws IOException {
         if (cache.has(key)) return cache.get(key);
-        System.out.println("don't have cached: " + key);
 
         File file = store.get(key);
         BufferedImage image = ImageIO.read(file);

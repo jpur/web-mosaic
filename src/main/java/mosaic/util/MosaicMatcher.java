@@ -6,6 +6,9 @@ import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
+/**
+ * A wrapper for a nearest-neighbor octree which stores image identifiers positioned by their color
+ */
 public final class MosaicMatcher {
     private VectorOctree<Vector3i, List<MosaicImageInfo>> octree;
 

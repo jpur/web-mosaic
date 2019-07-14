@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class InMemoryCache<T> extends CachedStore<T> {
+public class InMemoryCache<T> implements ItemCache<T> {
     private final Map<String, T> map;
     private final int maxEntries;
 

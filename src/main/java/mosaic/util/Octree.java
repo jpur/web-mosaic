@@ -3,6 +3,11 @@ package mosaic.util;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
+/**
+ * A data structure for efficiently searching a 3D space
+ * @param <K> The key type that defines the position of values in the 3D space
+ * @param <V> The value type associated with each key
+ */
 public interface Octree<K, V> {
     final class OctreeNode<K, V> {
         public final boolean isLeaf;

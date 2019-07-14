@@ -2,8 +2,9 @@ package mosaic.util;
 
 import mosaic.util.helper.HelperUtils;
 
-import java.util.Vector;
-
+/**
+ * Defines a point in 3D space
+ */
 public class Vector3i {
     private int x, y, z;
 
@@ -12,8 +13,7 @@ public class Vector3i {
         this.y = y;
         this.z = z;
     }
-
-    public static <T> int distance(Vector3i a, Vector3i b) {
+    public static int distance(Vector3i a, Vector3i b) {
         return HelperUtils.distance(a.getX(), a.getY(), a.getZ(), b.getX(), b.getY(), b.getZ());
     }
 
