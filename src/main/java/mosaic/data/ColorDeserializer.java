@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.node.IntNode;
 import java.awt.Color;
 import java.io.IOException;
 
+/**
+ * Used by the JSON deserializer for parsing Color objects
+ */
 public class ColorDeserializer extends JsonDeserializer<Color> {
     @Override
     public Color deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {

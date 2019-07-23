@@ -15,6 +15,9 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An image store for accessing and retrieving images stored on an Amazon S3 bucket
+ */
 public class S3ImageStore implements ImageStore {
     private final IdProvider idProvider;
     private final S3Client s3;
@@ -52,6 +55,7 @@ public class S3ImageStore implements ImageStore {
         GetObjectRequest req = GetObjectRequest.builder().bucket(bucket).key(key).build();
         ResponseBytes<GetObjectResponse> obj = s3.getObject(req, ResponseTransformer.toBytes());
 
+        // Save response to file
         String format = obj.response().metadata().get("format");
         File file = new File(rootDir, String.format("%s.%s", key, format));
         FileOutputStream fos = new FileOutputStream(file);

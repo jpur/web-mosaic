@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * An image store which stores and retrieves images on the local file system
+ */
 public class FileSystemImageStore implements ImageStore {
     private final ConcurrentHashMap<String, File> images = new ConcurrentHashMap<>();
 
@@ -44,7 +47,7 @@ public class FileSystemImageStore implements ImageStore {
     private File writeToFile(String fileName, String format, BufferedImage img) throws IOException {
         File file = new File(rootDir, fileName);
 
-        // Note: This sometimes outputs incorrect colors if writing to a JPG (long-term bug due to alpha values or something?)
+        // Note: This sometimes outputs incorrect colors if writing to a JPG (Java bug)
         ImageIO.write(img, format, file);
         return file;
     }

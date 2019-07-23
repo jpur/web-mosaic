@@ -5,11 +5,23 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * A cache which stores and retrieves objects from a fixed pool
+ * @param <T>
+ */
 public class InMemoryCache<T> implements ItemCache<T> {
+    // Stores key->object pairings
     private final Map<String, T> map;
+
+    // The maximum number of objects this cache can store
     private final int maxEntries;
 
+    /**
+     * Initializes the cache
+     * @param maxEntries The maximum number of objects this cache can store
+     */
     public InMemoryCache(int maxEntries) {
+        // Set up LRU cache
         Map<String, T> lru = new LinkedHashMap<String, T>() {
             @Override
             public boolean removeEldestEntry(Map.Entry<String, T> eldest) {

@@ -4,6 +4,7 @@ import mosaic.data.store.FileSystemImageStore;
 import mosaic.data.store.ImageStore;
 import mosaic.data.store.S3ImageStore;
 import mosaic.data.store.cache.InMemoryCache;
+import mosaic.util.id.AlphanumericIdProvider;
 import mosaic.util.id.IdProvider;
 import mosaic.util.id.IncreasingIntegerIdProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +43,7 @@ public class ApplicationWebConfiguration implements WebMvcConfigurer {
 
     @Bean
     public IdProvider getImageStoreIdProvider() {
-        return new IncreasingIntegerIdProvider(0);
+        return new AlphanumericIdProvider();
     }
 
     @Bean
