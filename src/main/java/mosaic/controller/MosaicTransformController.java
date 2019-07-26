@@ -47,15 +47,8 @@ public class MosaicTransformController {
         this.executor = executor;
         this.userImageStore = userImageStore;
 
-        // Parse key/color pairs TODO: Shouldn't do this here, clean up later
-        File file = new File(subImgDataPath);
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(Color.class, new ColorDeserializer());
-        mapper.registerModule(module);
-        MosaicImageInfo[] info = mapper.readValue(file, MosaicImageInfo[].class);
-
-        mosaicData = new MosaicMatcher(Arrays.asList(info));
+        MosaicImageInfo[] imageInfo = getKeyColorPairs(subImgDataPath);
+        mosaicData = new MosaicMatcher(Arrays.asList(imageInfo));
         transformer = new ThreadedMosaicTransformer(new ExecutorServiceAdapter(executor),
                 mosaicData, new ColorImageStoreClient(subImageStore), MosaicTransformer.Shape.Square, tileSize);
     }
@@ -78,5 +71,15 @@ public class MosaicTransformController {
 
         // Redirect to mosaic location
         return String.format("redirect:/v/%s", key);
+    }
+
+    private MosaicImageInfo[] getKeyColorPairs(String subImgDataPath) throws IOException {
+        // Parse key/image pairs from JSON data file
+        File file = new File(subImgDataPath);
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Color.class, new ColorDeserializer());
+        mapper.registerModule(module);
+        return mapper.readValue(file, MosaicImageInfo[].class);
     }
 }

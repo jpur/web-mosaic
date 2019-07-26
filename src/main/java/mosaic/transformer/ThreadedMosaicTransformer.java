@@ -11,12 +11,22 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 public class ThreadedMosaicTransformer extends MosaicTransformer {
+    /**
+     * Run on worker threads; replaces pixels of a set number of tiles
+     */
     private class MosaicTask implements Callable<Object> {
         private final BufferedImage source;
         private final BufferedImage target;
         private final int tileStart;
         private final int tileEnd;
 
+        /**
+         * Initializes parameters of the mosaic sub-task
+         * @param source The image to use as a reference for tile replacement
+         * @param target The image to output replaced tiles on
+         * @param tileStart The start range of the tiles to replace
+         * @param tileEnd The end range of the tiles to replace
+         */
         public MosaicTask(BufferedImage source, BufferedImage target, int tileStart, int tileEnd) {
             this.source = source;
             this.target = target;
@@ -28,9 +38,11 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
         public Object call() {
             int tilesPerRow = (int)Math.ceil((double)source.getWidth() / size);
             for (int i = tileStart; i < tileEnd; i++) {
+                // Find the upper-left x and y coordinates of the current tile
                 int x = i % tilesPerRow * size;
                 int y = i / tilesPerRow * size;
 
+                // Find the size of the tile (possibly smaller than our given size when near the boundaries of the source image)
                 int xSize = Math.min(size, source.getWidth() - x);
                 int ySize = Math.min(size, source.getHeight() - y);
 
@@ -50,6 +62,7 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
         }
     }
 
+    // The maximum number of tiles a task should be responsible for
     private final int maxTilesPerTask = 100;
     private final ExecutorService executor;
 
@@ -70,12 +83,14 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
         int height = image.getHeight();
         BufferedImage out = new BufferedImage(width, height, image.getType());
 
+        // Split all tiles of the image into equally-sized tasks
         List<MosaicTask> tasks = new ArrayList<>();
         int numTiles = (int)(Math.ceil((double)height / size) * Math.ceil((double)width / size));
         for (int i = 0; i < numTiles; i += maxTilesPerTask) {
             tasks.add(new MosaicTask(image, out, i, Math.min(i + maxTilesPerTask, numTiles)));
         }
 
+        // Pass tasks to executor
         try {
             executor.invokeAll(tasks);
         } catch (InterruptedException e) {
