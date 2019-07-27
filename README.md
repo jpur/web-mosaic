@@ -9,7 +9,7 @@ You need to supply the app with sub-images which are used to transform an image 
 
 ```
 [{"name": "0_cat.png", "color": {"r": 110, "g": 110, "b": 104}}, 
-{{"name": "1000_dog.png", "color": {"r": 138, "g": 132, "b": 128}}]
+{"name": "1000_dog.png", "color": {"r": 138, "g": 132, "b": 128}}]
 ```
 
-Make sure to update the locations in the application.properties and other relevant properties before running the app.
+Make sure to update the locations in *src/main/resources/application.properties* and other relevant properties before running the app.
