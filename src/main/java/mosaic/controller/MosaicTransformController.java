@@ -36,16 +36,20 @@ public class MosaicTransformController {
 
     private final TaskExecutor executor;
 
-    private final String imageOutputFormat = "png";
-    private final int tileSize = 10;
+    private final int tileSize;
+    private final String imageOutputFormat;
 
     @Autowired
     public MosaicTransformController(TaskExecutor executor,
                                      @Qualifier(value = "userStore") ImageStore userImageStore,
                                      @Qualifier(value = "imageStore") ImageStore subImageStore,
-                                     @Value("${mosaic.sub_img_data_path}") String subImgDataPath) throws IOException {
+                                     @Value("${mosaic.sub_img_data_path}") String subImgDataPath,
+                                     @Value("${mosaic.sub_img_size}") int subImgSize,
+                                     @Value("${mosaic.output_file_format}") String outputFileFormat) throws IOException {
         this.executor = executor;
         this.userImageStore = userImageStore;
+        this.tileSize = subImgSize;
+        this.imageOutputFormat = outputFileFormat;
 
         MosaicImageInfo[] imageInfo = getKeyColorPairs(subImgDataPath);
         mosaicData = new MosaicMatcher(Arrays.asList(imageInfo));
