@@ -21,4 +21,8 @@ public final class HelperUtils {
     public static <T> T getRandom(List<T> list) {
         return list != null && !list.isEmpty() ? list.get(rand.nextInt(list.size())) : null;
     }
+
+    public static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(value, max));
+    }
 }

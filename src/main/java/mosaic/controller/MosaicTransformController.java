@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import mosaic.data.ColorDeserializer;
 import mosaic.data.store.ColorImageStoreClient;
+import mosaic.transformer.mosaic.*;
+import mosaic.transformer.mosaic.shape.*;
 import mosaic.util.MosaicMatcher;
 import mosaic.data.MosaicImageInfo;
 import mosaic.data.store.ImageStore;
-import mosaic.transformer.MosaicTransformer;
-import mosaic.transformer.ThreadedMosaicTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,8 +53,9 @@ public class MosaicTransformController {
 
         MosaicImageInfo[] imageInfo = getKeyColorPairs(subImgDataPath);
         mosaicData = new MosaicMatcher(Arrays.asList(imageInfo));
-        transformer = new ThreadedMosaicTransformer(new ExecutorServiceAdapter(executor),
-                mosaicData, new ColorImageStoreClient(subImageStore), MosaicTransformer.Shape.Square, tileSize);
+
+        MosaicShapeColorer shape = new DiamondMosaicColorer(mosaicData, new ColorImageStoreClient(subImageStore), tileSize);
+        transformer = new ThreadedMosaicTransformer(new ExecutorServiceAdapter(executor), shape);
     }
 
     @GetMapping("/transform")

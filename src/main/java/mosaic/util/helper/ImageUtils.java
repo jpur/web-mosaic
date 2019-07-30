@@ -14,4 +14,12 @@ public class ImageUtils {
 
         return dimg;
     }
+
+    public static BufferedImage copy(BufferedImage img) {
+        BufferedImage out = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
+        Graphics g = out.getGraphics();
+        g.drawImage(img, 0, 0, null);
+        g.dispose();
+        return out;
+    }
 }
