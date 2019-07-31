@@ -16,12 +16,12 @@ public class SquareMosaicColorer extends MosaicShapeColorer {
     @Override
     public List<MosaicTask> getMosaicTasks(BufferedImage source, BufferedImage target, int maxTilesPerTask) {
         List<MosaicTask> tasks = new ArrayList<>();
-        int numTiles = (int)(Math.ceil((double)target.getHeight() / size) * Math.ceil((double)target.getWidth() / size));
-        System.out.println(numTiles);
 
+        int numTiles = (int)(Math.ceil((double)target.getHeight() / size) * Math.ceil((double)target.getWidth() / size));
         for (int i = 0; i < numTiles; i += maxTilesPerTask) {
             tasks.add(new MosaicTask(source, target, i, Math.min(i + maxTilesPerTask, numTiles)));
         }
+
         return tasks;
     }
 

@@ -23,8 +23,6 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
 
     @Override
     public BufferedImage transform(BufferedImage image) {
-        int width = image.getWidth();
-        int height = image.getHeight();
         BufferedImage out = ImageUtils.copy(image);
 
         // Split all tiles of the image into equally-sized tasks
