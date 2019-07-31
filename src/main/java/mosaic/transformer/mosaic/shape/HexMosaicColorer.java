@@ -8,8 +8,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiamondMosaicColorer extends MosaicShapeColorer {
-    public DiamondMosaicColorer(MosaicMatcher matcher, StoreClient<int[]> mosaicStore, int size) {
+public class HexMosaicColorer extends MosaicShapeColorer {
+    public HexMosaicColorer(MosaicMatcher matcher, StoreClient<int[]> mosaicStore, int size) {
         super(matcher, mosaicStore, size);
     }
 
@@ -31,8 +31,8 @@ public class DiamondMosaicColorer extends MosaicShapeColorer {
 
     @Override
     protected Polygon generatePolygon(int size) {
-        int[] xPoints = { size/2, size, size/2, 0 };
-        int[] yPoints = { 0, size/2, size, size/2 };
-        return new Polygon(xPoints, yPoints, 4);
+        int[] xPoints = { size/2, size, size, size/2, 0, 0 };
+        int[] yPoints = { 0, size/4, 3*size/4, size, 3*size/4, size/4 };
+        return new Polygon(xPoints, yPoints, 6);
     }
 }

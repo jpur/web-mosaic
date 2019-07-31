@@ -53,21 +53,20 @@ public abstract class MosaicShapeColorer {
                 int x = i % tilesPerRow * size + offsetX;
                 int y = i / tilesPerRow * size + offsetY;
 
-                // Find the size of the tile (possibly smaller than our given size when near the boundaries of the source image)
-                int xSize = Math.min(size, source.getWidth() - (x % source.getWidth()));
-                int ySize = Math.min(size, source.getHeight() - (y % source.getHeight()));
-
                 try {
-                    ImageSection sect = new ImageSection(target, x, y, size, size);
+                    ImageSection sect = new ImageSection(target, x, y);
 
-                    // Get sub-image to replace subsection of image
-                    int[] pixels = sect.getPixels();
-                    recolor(pixels);
+                    // Get subsection of image to replace
+                    int[] sizedArr = new int[size * size];
+                    int[] pixels = sect.getPixels(sizedArr);
+                    Color avgColor = ColorUtils.getAverageColor(pixels);
+
+                    // Recolor source image with appropriate sub-image
+                    recolor(sizedArr, getRecolorTile(sizedArr, avgColor));
 
                     // Draw sub-image to corresponding subsection of mosaic
-                    sect.setPixels(pixels);
-                } catch (Exception e) {
-                    System.out.printf("%d %d %d %d\n", x, y, xSize, ySize);
+                    sect.setPixels(sizedArr);
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
 
@@ -77,65 +76,53 @@ public abstract class MosaicShapeColorer {
         }
     }
 
-    private static class ImageSection {
-        private final int x;
-        private final int y;
-        private final int xSize;
-        private final int ySize;
-
+    private class ImageSection {
         private final BufferedImage image;
 
-        public ImageSection(BufferedImage image, int x, int y, int xSize, int ySize) {
+        private final int x;
+        private final int y;
+
+        private final int constrainedX;
+        private final int constrainedY;
+
+        private final int constrainedXSize;
+        private final int constrainedYSize;
+
+        public ImageSection(BufferedImage image, int x, int y) {
+            this.image = image;
             this.x = x;
             this.y = y;
-            this.xSize = xSize;
-            this.ySize = ySize;
-            this.image = image;
+
+            // Compute constrained bounds for image
+            constrainedX = HelperUtils.clamp(x, 0, image.getWidth());
+            constrainedY = HelperUtils.clamp(y, 0, image.getHeight());
+            constrainedXSize = HelperUtils.clamp(x + size, 0, image.getWidth()) - constrainedX;
+            constrainedYSize = HelperUtils.clamp(y + size, 0, image.getHeight()) - constrainedY;
         }
 
-        public int[] getPixels() {
-            int[] out = new int[xSize * ySize];
-            int constrainedX = HelperUtils.clamp(x, 0, image.getWidth()-1);
-            int constrainedXSize = HelperUtils.clamp(x + xSize, 0, image.getWidth()-1) - x;
-
-            int constrainedY = HelperUtils.clamp(y, 0, image.getHeight()-1);
-            int constrainedYSize = HelperUtils.clamp(y + ySize, 0, image.getHeight()-1) - y;
-
-            int xOffset = xSize - constrainedXSize;
-            int yOffset = ySize - constrainedYSize;
+        public int[] getPixels(int[] sizeArr) {
+            int xOffset = constrainedX - x;
+            int yOffset = constrainedY - y;
 
             int[] pixels = image.getRGB(constrainedX, constrainedY, constrainedXSize, constrainedYSize, null, 0, constrainedXSize);
-            int pIdx = 0;
             for (int ix = 0; ix < constrainedXSize; ix++) {
                 for (int iy = 0; iy < constrainedYSize; iy++) {
-                    out[(iy+yOffset) * xSize + xOffset + ix] = pixels[pIdx++];
+                    sizeArr[(iy + yOffset) * size + xOffset + ix] = pixels[iy * constrainedXSize + ix];
                 }
             }
 
-            return out;
+            return pixels;
         }
 
         public void setPixels(int[] pixels) {
-            int constrainedX = HelperUtils.clamp(x, 0, image.getWidth());
-            int constrainedXSize = HelperUtils.clamp(x + xSize, 0, image.getWidth() - 1) - x;
+            int xOffset = constrainedX - x;
+            int yOffset = constrainedY - y;
 
-            int constrainedY = HelperUtils.clamp(y, 0, image.getHeight());
-            int constrainedYSize = HelperUtils.clamp(y + ySize, 0, image.getHeight() - 1) - y;
-
-            int xOffset = xSize - constrainedXSize;
-            int yOffset = ySize - constrainedYSize;
-
-            try {
-                int pIdx = 0;
-                for (int ix = 0; ix < constrainedXSize; ix++) {
-                    for (int iy = 0; iy < constrainedYSize; iy++) {
-                        int color = pixels[(yOffset + iy) * xSize + (xOffset + ix)];
-                        image.setRGB(constrainedX + ix, constrainedY + iy, color);
-                    }
+            for (int ix = 0; ix < constrainedXSize; ix++) {
+                for (int iy = 0; iy < constrainedYSize; iy++) {
+                    int color = pixels[(yOffset + iy) * size + (xOffset + ix)];
+                    image.setRGB(constrainedX + ix, constrainedY + iy, color);
                 }
-            } catch (Exception e) {
-                //System.out.printf("%d %d %d %d | %d %d %d %d\n", x, y, xSize, ySize, constrainedX, constrainedY, constrainedXSize, constrainedYSize);
-                e.printStackTrace();
             }
         }
     }
@@ -153,9 +140,9 @@ public abstract class MosaicShapeColorer {
         this.polygon = generatePolygon(size);
     }
 
-    public void recolor(int[] target) throws IOException {
-        int[] source = getRecolorTile(target);
+    public abstract List<MosaicTask> getMosaicTasks(BufferedImage source, BufferedImage target, int maxTilesPerTask);
 
+    public void recolor(int[] target, int[] source) {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 if (polygon.contains(x, y)) {
@@ -165,14 +152,10 @@ public abstract class MosaicShapeColorer {
         }
     }
 
-    public abstract List<MosaicTask> getMosaicTasks(BufferedImage source, BufferedImage target, int maxTilesPerTask);
-
     protected abstract Polygon generatePolygon(int size);
 
-    protected int[] getRecolorTile(int[] arr) throws IOException {
-        Color avgCol = ColorUtils.getAverageColor(arr);
-        MosaicImageInfo imageInfo = HelperUtils.getRandom(matcher.getNearest(avgCol, 2));
-
+    protected int[] getRecolorTile(int[] arr, Color color) throws IOException {
+        MosaicImageInfo imageInfo = HelperUtils.getRandom(matcher.getNearest(color, 2));
         return mosaicStore.get(imageInfo.getName());
     }
 }

@@ -27,17 +27,8 @@ public class SquareMosaicColorer extends MosaicShapeColorer {
 
     @Override
     protected Polygon generatePolygon(int size) {
-        int[] xPoints = new int[4];
-        int[] yPoints = new int[4];
-        xPoints[0] = 0;
-        xPoints[1] = size;
-        xPoints[2] = size;
-        xPoints[3] = 0;
-        yPoints[0] = 0;
-        yPoints[1] = 0;
-        yPoints[2] = size;
-        yPoints[3] = size;
-
+        int[] xPoints = { 0, size, size, 0 };
+        int[] yPoints = { 0, 0, size, size };
         return new Polygon(xPoints, yPoints, 4);
     }
 }

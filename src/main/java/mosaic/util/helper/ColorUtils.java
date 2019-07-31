@@ -11,6 +11,8 @@ public final class ColorUtils {
      * @return The average color of the array
      */
     public static Color getAverageColor(int[] colors) {
+        if (colors.length == 0) return Color.black;
+
         int r = 0, g = 0, b = 0;
         for (int i : colors) {
             Color col = new Color(i);

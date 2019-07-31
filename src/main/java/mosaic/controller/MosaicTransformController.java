@@ -51,10 +51,10 @@ public class MosaicTransformController {
         this.tileSize = subImgSize;
         this.imageOutputFormat = outputFileFormat;
 
+        // Set up transformer
         MosaicImageInfo[] imageInfo = getKeyColorPairs(subImgDataPath);
         mosaicData = new MosaicMatcher(Arrays.asList(imageInfo));
-
-        MosaicShapeColorer shape = new DiamondMosaicColorer(mosaicData, new ColorImageStoreClient(subImageStore), tileSize);
+        MosaicShapeColorer shape = new SquareMosaicColorer(mosaicData, new ColorImageStoreClient(subImageStore), 20);
         transformer = new ThreadedMosaicTransformer(new ExecutorServiceAdapter(executor), shape);
     }
 

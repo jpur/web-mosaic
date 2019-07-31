@@ -22,7 +22,7 @@ public class MosaicTransformer implements ImageTransformer {
     }
 
     @Override
-    public BufferedImage transform(BufferedImage image) throws IOException {
+    public BufferedImage transform(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         BufferedImage out = new BufferedImage(width, height, image.getType());
@@ -33,18 +33,5 @@ public class MosaicTransformer implements ImageTransformer {
         }
 
         return out;
-    }
-
-    /**
-     * Replaces the pixels of a given tile of a target image
-     * @param target The image to modify
-     * @param x The start x-coordinate of the target tile
-     * @param y The start y-coordinate of the target tile
-     * @param tile The source tile
-     * @param xSize The width of the source tile
-     * @param ySize The height of the source tile
-     */
-    protected void draw(BufferedImage target, int x, int y, int[] tile, int xSize, int ySize) {
-        target.setRGB(x, y, xSize, ySize, tile, 0, xSize);
     }
 }
