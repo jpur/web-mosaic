@@ -10,23 +10,24 @@ import java.util.List;
  */
 public interface Octree<K, V> {
     final class OctreeNode<K, V> {
-        public final boolean isLeaf;
         public final Bounds bounds;
         public final List<OctreeNode<K, V>> children;
         public final SimpleEntry<K, V> value;
 
         public OctreeNode(Bounds bounds, SimpleEntry<K, V> value) {
-            this.isLeaf = true;
             this.bounds = bounds;
             this.children = null;
             this.value = value;
         }
 
         public OctreeNode(Bounds bounds, List<OctreeNode<K, V>> children) {
-            this.isLeaf = false;
             this.bounds = bounds;
             this.value = null;
             this.children = children;
+        }
+
+        public boolean isLeaf() {
+            return value != null;
         }
     }
 

@@ -46,7 +46,7 @@ public class VectorOctree<K extends Vector3i, T> implements Octree<K, T> {
         while (!pq.isEmpty() && neighbors.size() < k) {
             // Get node closest to key
             OctreeNode<K, T> node = pq.poll();
-            if (node.isLeaf) {
+            if (node.isLeaf()) {
                 // Leaf and closest node so it must be a neighbor, add to neighbor list
                 neighbors.add(node.value);
             } else {
@@ -66,7 +66,7 @@ public class VectorOctree<K extends Vector3i, T> implements Octree<K, T> {
      */
     private int distance(K source, OctreeNode<K, T> node) {
         // Return color-distance if node is a leaf
-        if (node.isLeaf) {
+        if (node.isLeaf()) {
             return Vector3i.distance(source, node.value.getKey());
         }
 
@@ -98,7 +98,7 @@ public class VectorOctree<K extends Vector3i, T> implements Octree<K, T> {
      * @return The root node of the subtree
      */
     private OctreeNode<K, T> build(List<SimpleEntry<K, T>> points, Bounds bounds, int depth) {
-        // Return leaf node is number of points less than threshold
+        // Return leaf node if number of points less than threshold
         if (points.size() < 10 || depth > maxDepth) {
             List<OctreeNode<K, T>> children = new ArrayList<>();
             for (SimpleEntry<K, T> p : points) {

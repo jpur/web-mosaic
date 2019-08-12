@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HexMosaicColorer extends MosaicShapeColorer {
+public class HexMosaicColorer extends ShapeMosaicColorer {
     public HexMosaicColorer(MosaicMatcher matcher, StoreClient<int[]> mosaicStore, int size) {
         super(matcher, mosaicStore, size);
     }

@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public abstract class MosaicShapeColorer {
+public abstract class ShapeMosaicColorer {
     /**
      * Run on worker threads; replaces pixels of a set number of tiles
      */
@@ -22,8 +22,8 @@ public abstract class MosaicShapeColorer {
         private final int tileStart;
         private final int tileEnd;
 
-        private int offsetX;
-        private int offsetY;
+        private final int offsetX;
+        private final int offsetY;
 
         /**
          * Initializes parameters of the mosaic sub-task
@@ -59,6 +59,9 @@ public abstract class MosaicShapeColorer {
             // Calculate the number of tiles that fit onto one row with added offsets
             int tilesPerRow = (int)Math.ceil(((double)source.getWidth() - offsetX) / size);
 
+            // Temp array for storing pixels of a tile in the following loop
+            int[] sizedArr = new int[size * size];
+
             for (int i = tileStart; i < tileEnd; i++) {
                 // Find the upper-left x and y coordinates of the current tile
                 int x = i % tilesPerRow * size + offsetX;
@@ -68,7 +71,6 @@ public abstract class MosaicShapeColorer {
                     ImageTile sect = new ImageTile(target, x, y);
 
                     // Get subsection of image to replace
-                    int[] sizedArr = new int[size * size];
                     int[] pixels = sect.getPixels(sizedArr);
                     Color avgColor = ColorUtils.getAverageColor(pixels);
 
@@ -88,7 +90,7 @@ public abstract class MosaicShapeColorer {
     }
 
     /**
-     * Represents a tile (of size in the MosaicShapeColorer) of an image for retrieving and modifying the pixels of
+     * Represents a tile (of size in the ShapeMosaicColorer) of an image for retrieving and modifying the pixels of
      */
     private class ImageTile {
         private final BufferedImage image;
@@ -122,14 +124,16 @@ public abstract class MosaicShapeColorer {
 
         /**
          * Get the pixels of this tile
-         * @param sizeArr A tile-sized array of pixels to copy this tile's pixels to (indices corresponding to pixels outside the bounds of the image are unchanged)
+         * @param sizedArr A tile-sized array of pixels to copy this tile's pixels to (indices corresponding to pixels outside the bounds of the image are unchanged)
          * @return The pixel array that was copied to the given array
          */
-        public int[] getPixels(int[] sizeArr) {
+        public int[] getPixels(int[] sizedArr) {
             int[] pixels = image.getRGB(constrainedX, constrainedY, constrainedXSize, constrainedYSize, null, 0, constrainedXSize);
+
+            // Assign pixels of unsized array to corresponding indices of sized array
             for (int ix = 0; ix < constrainedXSize; ix++) {
                 for (int iy = 0; iy < constrainedYSize; iy++) {
-                    sizeArr[(iy + yOffset) * size + xOffset + ix] = pixels[iy * constrainedXSize + ix];
+                    sizedArr[(iy + yOffset) * size + xOffset + ix] = pixels[iy * constrainedXSize + ix];
                 }
             }
 
@@ -150,8 +154,9 @@ public abstract class MosaicShapeColorer {
         }
     }
 
-
     protected final int size;
+
+    private static final int maxRecolorNeighbors = 2;
 
     private final MosaicMatcher matcher;
     private final StoreClient<int[]> mosaicStore;
@@ -164,7 +169,7 @@ public abstract class MosaicShapeColorer {
      * @param mosaicStore The image store used for retrieving the pixels of a sub-image returned by a matcher
      * @param size The size of the tiles the mosaic is broken up into
      */
-    public MosaicShapeColorer(MosaicMatcher matcher, StoreClient<int[]> mosaicStore, int size) {
+    public ShapeMosaicColorer(MosaicMatcher matcher, StoreClient<int[]> mosaicStore, int size) {
         this.matcher = matcher;
         this.mosaicStore = mosaicStore;
         this.size = size;
@@ -195,7 +200,8 @@ public abstract class MosaicShapeColorer {
      * @throws IOException Thrown if no pixel array could be found
      */
     private int[] getRecolorTile(int[] arr, Color color) throws IOException {
-        MosaicImageInfo imageInfo = HelperUtils.getRandom(matcher.getNearest(color, 2));
+        // Return a random pixel array from neighbors similar to the given key
+        MosaicImageInfo imageInfo = HelperUtils.getRandom(matcher.getNearest(color, maxRecolorNeighbors));
         return mosaicStore.get(imageInfo.getName());
     }
 
@@ -207,6 +213,7 @@ public abstract class MosaicShapeColorer {
     private void recolor(int[] target, int[] source) {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
+                // Only assign pixels contained within our shape
                 if (polygon.contains(x, y)) {
                     target[y * size + x] = source[y * size + x];
                 }

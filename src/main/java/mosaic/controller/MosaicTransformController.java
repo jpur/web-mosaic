@@ -54,7 +54,7 @@ public class MosaicTransformController {
         // Set up transformer
         MosaicImageInfo[] imageInfo = getKeyColorPairs(subImgDataPath);
         mosaicData = new MosaicMatcher(Arrays.asList(imageInfo));
-        MosaicShapeColorer shape = new SquareMosaicColorer(mosaicData, new ColorImageStoreClient(subImageStore), tileSize);
+        ShapeMosaicColorer shape = new SquareMosaicColorer(mosaicData, new ColorImageStoreClient(subImageStore), tileSize);
         transformer = new ThreadedMosaicTransformer(new ExecutorServiceAdapter(executor), shape);
     }
 

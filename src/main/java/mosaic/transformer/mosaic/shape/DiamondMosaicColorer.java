@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiamondMosaicColorer extends MosaicShapeColorer {
+public class DiamondMosaicColorer extends ShapeMosaicColorer {
     public DiamondMosaicColorer(MosaicMatcher matcher, StoreClient<int[]> mosaicStore, int size) {
         super(matcher, mosaicStore, size);
     }

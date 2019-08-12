@@ -1,6 +1,6 @@
 package mosaic.transformer.mosaic;
 
-import mosaic.transformer.mosaic.shape.MosaicShapeColorer;
+import mosaic.transformer.mosaic.shape.ShapeMosaicColorer;
 import mosaic.util.helper.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -16,7 +16,7 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
      * Constructs a mosaic transformer with the given parameters
      * @param shape The shape of the sub-images
      */
-    public ThreadedMosaicTransformer(ExecutorService executor, MosaicShapeColorer shape) {
+    public ThreadedMosaicTransformer(ExecutorService executor, ShapeMosaicColorer shape) {
         super(shape);
         this.executor = executor;
     }
@@ -26,7 +26,7 @@ public class ThreadedMosaicTransformer extends MosaicTransformer {
         BufferedImage out = ImageUtils.copy(image);
 
         // Split all tiles of the image into equally-sized tasks
-        List<MosaicShapeColorer.MosaicTask> tasks = shape.getMosaicTasks(image, out, maxTilesPerTask);
+        List<ShapeMosaicColorer.MosaicTask> tasks = shape.getMosaicTasks(image, out, maxTilesPerTask);
 
         // Pass tasks to executor
         try {

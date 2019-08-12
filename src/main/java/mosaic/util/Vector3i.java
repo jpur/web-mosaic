@@ -13,6 +13,13 @@ public class Vector3i {
         this.y = y;
         this.z = z;
     }
+
+    /**
+     * Returns the distance between two vectors
+     * @param a The first vector
+     * @param b The second vector
+     * @return The distance between the two vectors
+     */
     public static int distance(Vector3i a, Vector3i b) {
         return HelperUtils.distance(a.getX(), a.getY(), a.getZ(), b.getX(), b.getY(), b.getZ());
     }
